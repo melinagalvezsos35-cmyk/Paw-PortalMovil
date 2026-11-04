@@ -1,7 +1,16 @@
 import 'package:flutter/material.dart';
 
-class HomeScreen extends StatelessWidget {
-  const HomeScreen({super.key}); // Sintaxis moderna recomendada en Flutter
+class HomeScreen extends StatefulWidget {
+  const HomeScreen({super.key});
+
+  @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  int _selectedIndex = 0;
+
+  final Color primaryTeal = const Color(0xFF00A896);
 
   @override
   Widget build(BuildContext context) {
@@ -12,7 +21,7 @@ class HomeScreen extends StatelessWidget {
           'Paw Portal',
           style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
         ),
-        backgroundColor: Colors.teal,
+        backgroundColor: primaryTeal,
         elevation: 0,
         actions: [
           IconButton(
@@ -48,7 +57,7 @@ class HomeScreen extends StatelessWidget {
                 ),
                 TextButton(
                   onPressed: () {},
-                  child: const Text('Ver todas'),
+                  child: Text('Ver todas', style: TextStyle(color: primaryTeal)),
                 ),
               ],
             ),
@@ -77,7 +86,8 @@ class HomeScreen extends StatelessWidget {
 
             Card(
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-              elevation: 2,
+              elevation: 0,
+              color: const Color(0xFFF1F5F9),
               child: Padding(
                 padding: const EdgeInsets.all(16.0),
                 child: Row(
@@ -85,10 +95,10 @@ class HomeScreen extends StatelessWidget {
                     Container(
                       padding: const EdgeInsets.all(12),
                       decoration: BoxDecoration(
-                        color: Colors.teal.shade50,
+                        color: Colors.white,
                         borderRadius: BorderRadius.circular(12),
                       ),
-                      child: const Icon(Icons.calendar_month, color: Colors.teal, size: 32),
+                      child: Icon(Icons.calendar_month, color: primaryTeal, size: 32),
                     ),
                     const SizedBox(width: 16),
                     Expanded(
@@ -100,8 +110,8 @@ class HomeScreen extends StatelessWidget {
                             style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
                           ),
                           const SizedBox(height: 4),
-                          Text('Viernes 14 de Nov, 10:00 AM', style: TextStyle(color: Colors.grey[600])),
-                          const Text('Dr. Carlos Pérez', style: TextStyle(color: Colors.teal, fontWeight: FontWeight.w500)),
+                          const Text('Viernes 14 de Nov, 10:00 AM', style: TextStyle(color: Colors.grey, fontSize: 13)),
+                          Text('Dr. Carlos Pérez', style: TextStyle(color: primaryTeal, fontWeight: FontWeight.w500, fontSize: 13)),
                         ],
                       ),
                     ),
@@ -113,20 +123,52 @@ class HomeScreen extends StatelessWidget {
         ),
       ),
       floatingActionButton: FloatingActionButton.extended(
-        onPressed: () {
-          // Abrir formulario para agendar cita
+        onPressed: () {},
+        backgroundColor: primaryTeal,
+        icon: const Icon(Icons.add, color: Colors.white),
+        label: const Text('Nueva Cita', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+      ),
+
+      // 🔽 BARRA DE NAVEGACIÓN INFERIOR AÑADIDA 🔽
+      bottomNavigationBar: BottomNavigationBar(
+        currentIndex: _selectedIndex,
+        onTap: (index) {
+          setState(() {
+            _selectedIndex = index;
+          });
         },
-        backgroundColor: Colors.teal,
-        icon: const Icon(Icons.add),
-        label: const Text('Nueva Cita'),
+        selectedItemColor: primaryTeal,
+        unselectedItemColor: Colors.grey,
+        type: BottomNavigationBarType.fixed,
+        items: const [
+          BottomNavigationBarItem(
+            icon: Icon(Icons.home_outlined),
+            activeIcon: Icon(Icons.home),
+            label: 'Inicio',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.calendar_today_outlined),
+            activeIcon: Icon(Icons.calendar_today),
+            label: 'Mis Citas',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.pets_outlined),
+            activeIcon: Icon(Icons.pets),
+            label: 'Mascotas',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.person_outline),
+            activeIcon: Icon(Icons.person),
+            label: 'Perfil',
+          ),
+        ],
       ),
     );
   }
 
-  // Widget auxiliar para tarjetas horizontales
   Widget _buildPetQuickCard(String name, String breed, IconData icon, Color color) {
     return Container(
-      width: 160,
+      width: 150,
       margin: const EdgeInsets.only(right: 12),
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
@@ -134,9 +176,9 @@ class HomeScreen extends StatelessWidget {
         borderRadius: BorderRadius.circular(15),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05), // Reemplazo moderno para .withOpacity()
+            color: Colors.black.withOpacity(0.04),
             blurRadius: 8,
-            offset: const Offset(0, 4),
+            offset: const Offset(0, 2),
           )
         ],
       ),
@@ -144,8 +186,8 @@ class HomeScreen extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           CircleAvatar(
-            backgroundColor: color.withValues(alpha: 0.2),
-            child: Icon(icon, color: color),
+            backgroundColor: color.withOpacity(0.15),
+            child: Icon(icon, color: color, size: 20),
           ),
           const SizedBox(height: 8),
           Text(name, style: const TextStyle(fontWeight: FontWeight.bold)),
