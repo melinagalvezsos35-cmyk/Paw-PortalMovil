@@ -1,4 +1,6 @@
+
 import 'package:flutter/material.dart';
+import '../utils/sesion_usuario.dart';
 import 'home_screen.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -9,242 +11,205 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
-  bool isPasswordVisible = false;
-  bool rememberAccount = true;
+  final _formKey = GlobalKey<FormState>();
+  final _nombreController = TextEditingController();
+  final _correoController = TextEditingController();
+  final _passwordController = TextEditingController();
 
-  final Color primaryGreen = const Color(0xFF006D5B);
+  bool _esRegistro = false;
+  bool _ocultarPassword = true;
+
+  final Color primaryTeal = const Color(0xFF00A896);
+
+  @override
+  void dispose() {
+    _nombreController.dispose();
+    _correoController.dispose();
+    _passwordController.dispose();
+    super.dispose();
+  }
+
+  void _procesarAcceso() {
+    if (!_formKey.currentState!.validate()) return;
+
+    // Guarda el nombre (si se registró) o lo toma del correo en memoria
+    SesionUsuario.iniciarSesion(
+      nuevoNombre: _esRegistro ? _nombreController.text : '',
+      nuevoCorreo: _correoController.text,
+    );
+
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (context) => const HomeScreen()),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF8FAFC),
+      backgroundColor: const Color(0xFFF8F9FA),
       body: SafeArea(
         child: Center(
           child: SingleChildScrollView(
-            padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                // Header / Tarjeta de Bienvenida
-                Container(
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFEEF3FF),
-                    borderRadius: BorderRadius.circular(20),
+            padding: const EdgeInsets.all(24.0),
+            child: Form(
+              key: _formKey,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  // Logo / Encabezado
+                  CircleAvatar(
+                    radius: 44,
+                    backgroundColor: primaryTeal.withOpacity(0.15),
+                    child: Icon(Icons.pets, size: 46, color: primaryTeal),
                   ),
-                  child: Row(
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.all(12),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          shape: BoxShape.circle,
-                        ),
-                        child: Icon(
-                          Icons.pets,
-                          size: 28,
-                          color: primaryGreen,
-                        ),
-                      ),
-                      const SizedBox(width: 14),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                              decoration: BoxDecoration(
-                                color: const Color(0xFF00BFA5),
-                                borderRadius: BorderRadius.circular(10),
-                              ),
-                              child: const Text(
-                                '🐾 Portal de Tutores',
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 10,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            ),
-                            const SizedBox(height: 6),
-                            const Text(
-                              '¡Hola de nuevo, tutor!',
-                              style: TextStyle(
-                                fontSize: 17,
-                                fontWeight: FontWeight.bold,
-                                color: Color(0xFF1E293B),
-                              ),
-                            ),
-                            const Text(
-                              'El bienestar de tus mejores amigos en un solo lugar.',
-                              style: TextStyle(fontSize: 11, color: Colors.grey),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
+                  const SizedBox(height: 16),
+                  const Text(
+                    'Paw Portal',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
                   ),
-                ),
-                const SizedBox(height: 28),
-
-                // Formulario en Tarjeta Limpia
-                Container(
-                  padding: const EdgeInsets.all(20),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(20),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.03),
-                        blurRadius: 10,
-                        offset: const Offset(0, 4),
-                      )
-                    ],
+                  const SizedBox(height: 6),
+                  Text(
+                    _esRegistro
+                        ? 'Crea tu cuenta para gestionar tus mascotas'
+                        : 'Inicia sesión para continuar',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(color: Colors.grey.shade600, fontSize: 15),
                   ),
-                  child: Column(
-                    children: [
-                      // Campo: Correo / Teléfono
-                      const Align(
-                        alignment: Alignment.centerLeft,
-                        child: Text(
-                          'Teléfono o Correo del tutor',
-                          style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      TextField(
-                        decoration: InputDecoration(
-                          hintText: 'ej. tutor@correo.com',
-                          prefixIcon: const Icon(Icons.person_outline, size: 20),
-                          filled: true,
-                          fillColor: const Color(0xFFF8FAFC),
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            borderSide: BorderSide.none,
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 16),
+                  const SizedBox(height: 32),
 
-                      // Campo: Contraseña
-                      const Align(
-                        alignment: Alignment.centerLeft,
-                        child: Text(
-                          'Contraseña',
-                          style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
+                  // Campo Nombre (solo visible al registrarse)
+                  if (_esRegistro) ...[
+                    TextFormField(
+                      controller: _nombreController,
+                      textCapitalization: TextCapitalization.words,
+                      decoration: InputDecoration(
+                        labelText: 'Nombre completo',
+                        prefixIcon: Icon(Icons.person_outline, color: primaryTeal),
+                        filled: true,
+                        fillColor: Colors.white,
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(14),
                         ),
                       ),
-                      const SizedBox(height: 8),
-                      TextField(
-                        obscureText: !isPasswordVisible,
-                        decoration: InputDecoration(
-                          hintText: 'Introduce tu contraseña',
-                          prefixIcon: const Icon(Icons.lock_outline, size: 20),
-                          suffixIcon: IconButton(
-                            icon: Icon(
-                              isPasswordVisible ? Icons.visibility : Icons.visibility_off,
-                              size: 20,
-                            ),
-                            onPressed: () => setState(() => isPasswordVisible = !isPasswordVisible),
-                          ),
-                          filled: true,
-                          fillColor: const Color(0xFFF8FAFC),
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            borderSide: BorderSide.none,
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-
-                      // Recordar / Olvidó contraseña
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Row(
-                            children: [
-                              Checkbox(
-                                value: rememberAccount,
-                                activeColor: primaryGreen,
-                                onChanged: (v) => setState(() => rememberAccount = v!),
-                              ),
-                              const Text('Recordarme', style: TextStyle(fontSize: 12)),
-                            ],
-                          ),
-                          TextButton(
-                            onPressed: () {},
-                            child: Text(
-                              '¿Olvidaste tu clave?',
-                              style: TextStyle(fontSize: 12, color: primaryGreen),
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 16),
-
-                      // Botón Iniciar Sesión
-                      SizedBox(
-                        width: double.infinity,
-                        height: 48,
-                        child: ElevatedButton(
-                          onPressed: () {
-                            Navigator.pushReplacement(
-                              context,
-                              MaterialPageRoute(builder: (_) => const HomeScreen()),
-                            );
-                          },
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: primaryGreen,
-                            elevation: 0,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                          ),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: const [
-                              Text(
-                                'Ingresar a Paw Portal',
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 14,
-                                ),
-                              ),
-                              SizedBox(width: 8),
-                              Icon(Icons.arrow_forward, color: Colors.white, size: 18),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 20),
-
-                // Enlace a Registro
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const Text(
-                      '¿Primera vez en Paw Portal?',
-                      style: TextStyle(fontSize: 13, color: Colors.grey),
+                      validator: (value) {
+                        if (_esRegistro && (value == null || value.trim().isEmpty)) {
+                          return 'Ingresa tu nombre';
+                        }
+                        return null;
+                      },
                     ),
-                    TextButton(
-                      onPressed: () {},
-                      child: Text(
-                        'Regístrate',
-                        style: TextStyle(
-                          fontSize: 13,
-                          fontWeight: FontWeight.bold,
-                          color: primaryGreen,
-                        ),
-                      ),
-                    ),
+                    const SizedBox(height: 16),
                   ],
-                ),
-              ],
+
+                  // Campo Correo
+                  TextFormField(
+                    controller: _correoController,
+                    keyboardType: TextInputType.emailAddress,
+                    decoration: InputDecoration(
+                      labelText: 'Correo electrónico',
+                      prefixIcon: Icon(Icons.email_outlined, color: primaryTeal),
+                      filled: true,
+                      fillColor: Colors.white,
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(14),
+                      ),
+                    ),
+                    validator: (value) {
+                      if (value == null || value.trim().isEmpty) {
+                        return 'Ingresa tu correo';
+                      }
+                      if (!value.contains('@')) {
+                        return 'Ingresa un correo válido';
+                      }
+                      return null;
+                    },
+                  ),
+                  const SizedBox(height: 16),
+
+                  // Campo Contraseña
+                  TextFormField(
+                    controller: _passwordController,
+                    obscureText: _ocultarPassword,
+                    decoration: InputDecoration(
+                      labelText: 'Contraseña',
+                      prefixIcon: Icon(Icons.lock_outline, color: primaryTeal),
+                      suffixIcon: IconButton(
+                        icon: Icon(
+                          _ocultarPassword
+                              ? Icons.visibility_outlined
+                              : Icons.visibility_off_outlined,
+                        ),
+                        onPressed: () {
+                          setState(() => _ocultarPassword = !_ocultarPassword);
+                        },
+                      ),
+                      filled: true,
+                      fillColor: Colors.white,
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(14),
+                      ),
+                    ),
+                    validator: (value) {
+                      if (value == null || value.length < 4) {
+                        return 'Mínimo 4 caracteres';
+                      }
+                      return null;
+                    },
+                  ),
+                  const SizedBox(height: 24),
+
+                  // Botón Principal
+                  FilledButton(
+                    style: FilledButton.styleFrom(
+                      backgroundColor: primaryTeal,
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(14),
+                      ),
+                    ),
+                    onPressed: _procesarAcceso,
+                    child: Text(
+                      _esRegistro ? 'Registrarme y Entrar' : 'Iniciar Sesión',
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+
+                  // Cambiar entre Login y Registro
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        _esRegistro
+                            ? '¿Ya tienes cuenta?'
+                            : '¿Aún no tienes cuenta?',
+                        style: TextStyle(color: Colors.grey.shade700),
+                      ),
+                      TextButton(
+                        onPressed: () {
+                          setState(() {
+                            _esRegistro = !_esRegistro;
+                            _formKey.currentState?.reset();
+                          });
+                        },
+                        child: Text(
+                          _esRegistro ? 'Inicia sesión' : 'Regístrate',
+                          style: TextStyle(
+                            color: primaryTeal,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
             ),
           ),
         ),

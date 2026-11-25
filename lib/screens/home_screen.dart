@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'citas_screen.dart';
+import 'mascotas_screen.dart';
+import 'perfil_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -14,6 +17,58 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    // Lista de vistas vinculadas a cada ícono de la barra inferior
+    final List<Widget> pantallas = [
+      _buildInicioScaffold(), // Índice 0: Tu pantalla principal actual
+      const CitasScreen(),    // Índice 1: Mis Citas
+      const MascotasScreen(), // Índice 2: Mascotas
+      const PerfilScreen(),   // Índice 3: Perfil
+    ];
+
+    return Scaffold(
+      // IndexedStack mantiene vivo el estado de cada pantalla al navegar
+      body: IndexedStack(
+        index: _selectedIndex,
+        children: pantallas,
+      ),
+      bottomNavigationBar: BottomNavigationBar(
+        currentIndex: _selectedIndex,
+        onTap: (index) {
+          setState(() {
+            _selectedIndex = index;
+          });
+        },
+        selectedItemColor: primaryTeal,
+        unselectedItemColor: Colors.grey,
+        type: BottomNavigationBarType.fixed,
+        items: const [
+          BottomNavigationBarItem(
+            icon: Icon(Icons.home_outlined),
+            activeIcon: Icon(Icons.home),
+            label: 'Inicio',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.calendar_today_outlined),
+            activeIcon: Icon(Icons.calendar_today),
+            label: 'Mis Citas',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.pets_outlined),
+            activeIcon: Icon(Icons.pets),
+            label: 'Mascotas',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.person_outline),
+            activeIcon: Icon(Icons.person),
+            label: 'Perfil',
+          ),
+        ],
+      ),
+    );
+  }
+
+  // Tu diseño original de Inicio encapsulado para el índice 0
+  Widget _buildInicioScaffold() {
     return Scaffold(
       backgroundColor: const Color(0xFFF8F9FA),
       appBar: AppBar(
@@ -35,7 +90,6 @@ class _HomeScreenState extends State<HomeScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Saludo de bienvenida
             const Text(
               '¡Hola, Usuario!',
               style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
@@ -56,14 +110,14 @@ class _HomeScreenState extends State<HomeScreen> {
                   style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                 ),
                 TextButton(
-                  onPressed: () {},
+                  // Al tocar "Ver todas" te lleva directo a la pestaña Mascotas (índice 2)
+                  onPressed: () => setState(() => _selectedIndex = 2),
                   child: Text('Ver todas', style: TextStyle(color: primaryTeal)),
                 ),
               ],
             ),
             const SizedBox(height: 8),
 
-            // Tarjetas horizontales de mascotas
             SizedBox(
               height: 120,
               child: ListView(
@@ -123,45 +177,11 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
       ),
       floatingActionButton: FloatingActionButton.extended(
-        onPressed: () {},
+        // Al tocar "Nueva Cita" desde Inicio, cambia a la pestaña Mis Citas (índice 1)
+        onPressed: () => setState(() => _selectedIndex = 1),
         backgroundColor: primaryTeal,
         icon: const Icon(Icons.add, color: Colors.white),
         label: const Text('Nueva Cita', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
-      ),
-
-      // 🔽 BARRA DE NAVEGACIÓN INFERIOR AÑADIDA 🔽
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: _selectedIndex,
-        onTap: (index) {
-          setState(() {
-            _selectedIndex = index;
-          });
-        },
-        selectedItemColor: primaryTeal,
-        unselectedItemColor: Colors.grey,
-        type: BottomNavigationBarType.fixed,
-        items: const [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.home_outlined),
-            activeIcon: Icon(Icons.home),
-            label: 'Inicio',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.calendar_today_outlined),
-            activeIcon: Icon(Icons.calendar_today),
-            label: 'Mis Citas',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.pets_outlined),
-            activeIcon: Icon(Icons.pets),
-            label: 'Mascotas',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.person_outline),
-            activeIcon: Icon(Icons.person),
-            label: 'Perfil',
-          ),
-        ],
       ),
     );
   }
